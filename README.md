@@ -83,7 +83,49 @@ Components are organized by feature for easy navigation:
 - **results/** - Results display and filtering
 - **shared/** - Reusable components used across features
 
-Each feature folder has an `index.ts` file for clean imports.
+
+### Judgment & Trade-offs
+
+- **Supabase for a relational, SQL-first backend**  
+  - The core of this app is **relational**: workspaces → submissions → questions → answers, plus many‑to‑many relations (`judge_assignments`, `evaluations`). A Postgres-backed service like Supabase is a natural fit because we:
+    - Run **joins and aggregations** for results (grouping by question, computing pass rates, filtering by judge/verdict).
+    - Enforce **foreign keys and cascading deletes** so cleaning up a workspace reliably removes submissions, questions, answers, assignments, and evaluations.
+  - Supabase also provides:
+    - **Edge Functions** running close to the database for the `run-evaluations` LLM pipeline, keeping all evaluation logic server-side with minimal plumbing.
+    - A **TypeScript client and typed schema** (`schema.sql` + `types/database.ts`) that align well with the React/TS frontend.
+  - Compared to more document-oriented backends (e.g. Firebase/Firestore), this avoids manual relational constraints; SQL gives clearer queries and behavior for this domain. The trade-off is leaning into SQL and Supabase tooling, but that’s acceptable here for the clarity and correctness it buys.
+
+- **Anonymous sessions instead of full auth**  
+  - The app generates a per-browser `userId` in `utils/session.ts` and uses that to scope data (workspaces, judges). There’s no login UI or password flow.  
+  - This keeps the UX frictionless for the challenge and avoids the complexity of OAuth/password reset flows that don’t add much to evaluating the LLM pipeline.  
+  - Trade-off: users are effectively tied to a single browser; there is no cross-device identity or team sharing. That’s acceptable for a single-user demo app.
+
+- **Single LLM provider (OpenAI)**  
+  - Supporting only OpenAI keeps the prompt format, error handling, and pricing expectations consistent. The Edge function is simpler to reason about and test.  
+  - Trade-off: no pluggable “model marketplace” abstraction. In a real product we’d likely introduce a provider interface, but here that would be extra codepaths for little interview value.
+
+- **Stateless judges instead of agents**  
+  - Judges are defined as `{ name, model, system_prompt }` and do not keep conversation history or state. Each evaluation is a pure function of (judge, question, answer).  
+  - This matches the rubric (“evaluators, not agents”), simplifies schema, and makes the system easy to debug—rerunning an evaluation with the same inputs produces the same behavior (modulo LLM randomness).
+
+- **Temporary workspaces and explicit Save**  
+  - Workspaces start as `temporary = true` when you upload data; they only become “real” when you name/save them. Temporary workspaces are hidden from the Workspaces list and cleaned up on app load.  
+  - This prevents the database from filling with half-finished runs while still letting us persist submissions/questions/answers during the workflow. The trade-off is slightly more logic around workspace cleanup, but the resulting UX (only seeing intentionally saved workspaces) is cleaner.
+
+- **Judges shared across workspaces instead of per-workspace copies**  
+  - Judges live at the user level and are referenced from multiple workspaces via `workspace_judge_selections` and `judge_assignments`. You configure a judge (prompt + model) once and can reuse it across many datasets.  
+  - This keeps the schema smaller (no judge duplication per workspace), makes it easy to improve a judge and re-run it across workspaces, and matches the mental model of “my library of AI graders”.  
+  - Trade-off: if you really wanted a slightly different version of a judge for one workspace, you’d create a new judge rather than tweak it in place. For this challenge, the simplicity and reusability of shared judges is more valuable than ultra-fine-grained per-workspace variants.
+
+- **Sequential evaluation instead of concurrency**  
+  - The Edge function processes assignments sequentially. This avoids hitting OpenAI rate limits, simplifies error handling, and keeps logs ordered and easy to follow.  
+  - Trade-off: slower throughput for very large batches. For an interview-scale app, clarity and reliability are more important than maximum parallelism.
+
+- **Fixed question types instead of fully dynamic schemas**  
+  - Questions are tagged with a small, fixed set of types (`multiple_choice`, `single_choice_with_reasoning`, `free_form`), and the Edge function’s prompt builder branches on this union.  
+  - This makes the evaluation logic predictable and testable: each type has clear expectations for how answers are shaped and how verdicts are decided.  
+  - Trade-off: you can’t arbitrarily invent new question types at runtime without a code change. For this challenge, the clarity and safety of a closed set of types is more valuable than maximal flexibility.
+
 
 ## How This Project Meets the Evaluation Rubric
 
@@ -119,15 +161,14 @@ Each feature folder has an `index.ts` file for clean imports.
 
 ### Judgment & Trade-offs
 
-- **Supabase over Firebase**  
-  - The core of this app is **relational**: workspaces → submissions → questions → answers, plus many‑to‑many relations (`judge_assignments`, `evaluations`). Postgres (via Supabase) is a more natural fit than a document store because we:
+- **Supabase for a relational, SQL-first backend**  
+  - The core of this app is **relational**: workspaces → submissions → questions → answers, plus many‑to‑many relations (`judge_assignments`, `evaluations`). A Postgres-backed service like Supabase is a natural fit because we:
     - Run **joins and aggregations** for results (grouping by question, computing pass rates, filtering by judge/verdict).
     - Enforce **foreign keys and cascading deletes** so cleaning up a workspace reliably removes submissions, questions, answers, assignments, and evaluations.
-  - Supabase also gives us:
-    - **Edge Functions** that run right next to the database for the `run-evaluations` LLM pipeline, reducing round trips and keeping all evaluation logic server-side.
-    - A **TypeScript client and typed schema** (`schema.sql` + `types/database.ts`) which align well with the React/TS frontend and keep queries type-safe.
-  - Firebase (especially Firestore) would make these relational queries and cascades more ad‑hoc (manual fan‑out/fan‑in, no true foreign keys), and Cloud Functions wiring would be heavier for a small project. For this challenge, Supabase gives us the right level of power with less plumbing.
-  - Trade-off: we lean into SQL and Supabase‑specific tooling, so porting to another backend later would require some migration work. That’s acceptable given the interview context and the benefits to clarity and correctness.
+  - Supabase also provides:
+    - **Edge Functions** running close to the database for the `run-evaluations` LLM pipeline, keeping all evaluation logic server-side with minimal plumbing.
+    - A **TypeScript client and typed schema** (`schema.sql` + `types/database.ts`) that align well with the React/TS frontend.
+  - Compared to more document-oriented backends (e.g. Firebase/Firestore), this avoids manual relational constraints; SQL gives clearer queries and behavior for this domain. The trade-off is leaning into SQL and Supabase tooling, but that’s acceptable here for the clarity and correctness it buys.
 
 - **Anonymous sessions instead of full auth**  
   - The app generates a per-browser `userId` in `utils/session.ts` and uses that to scope data (workspaces, judges). There’s no login UI or password flow.  
@@ -146,9 +187,16 @@ Each feature folder has an `index.ts` file for clean imports.
   - Workspaces start as `temporary = true` when you upload data; they only become “real” when you name/save them. Temporary workspaces are hidden from the Workspaces list and cleaned up on app load.  
   - This prevents the database from filling with half-finished runs while still letting us persist submissions/questions/answers during the workflow. The trade-off is slightly more logic around workspace cleanup, but the resulting UX (only seeing intentionally saved workspaces) is cleaner.
 
+- **Judges shared across workspaces instead of per-workspace copies**  
+  - Judges live at the user level and are referenced from multiple workspaces via `workspace_judge_selections` and `judge_assignments`. You configure a judge (prompt + model) once and can reuse it across many datasets.  
+  - This keeps the schema smaller (no judge duplication per workspace), makes it easy to improve a judge and re-run it across workspaces, and matches the mental model of “my library of AI graders”.  
+  - Trade-off: if you really wanted a slightly different version of a judge for one workspace, you’d create a new judge rather than tweak it in place. For this challenge, the simplicity and reusability of shared judges is more valuable than ultra-fine-grained per-workspace variants.
+
 - **Sequential evaluation instead of concurrency**  
   - The Edge function processes assignments sequentially. This avoids hitting OpenAI rate limits, simplifies error handling, and keeps logs ordered and easy to follow.  
   - Trade-off: slower throughput for very large batches. For an interview-scale app, clarity and reliability are more important than maximum parallelism.
 
-- **Scope limits**  
-  - No streaming UI, no background job system, and no multi-tenant auth—all deliberate cuts to keep the focus on a **clean evaluation pipeline**, **schema**, and **LLM integration** that are easy to explain and extend.
+- **Fixed question types instead of fully dynamic schemas**  
+  - Questions are tagged with a small, fixed set of types (`multiple_choice`, `single_choice_with_reasoning`, `free_form`), and the Edge function’s prompt builder branches on this union.  
+  - This makes the evaluation logic predictable and testable: each type has clear expectations for how answers are shaped and how verdicts are decided.  
+  - Trade-off: you can’t arbitrarily invent new question types at runtime without a code change. For this challenge, the clarity and safety of a closed set of types is more valuable than maximal flexibility.
