@@ -189,7 +189,9 @@ function WorkspaceView({ workspaceId, viewMode: viewModeParam, onBack, showNamin
   };
 
   return (
-    <div className="space-y-8">
+    <main className="relative pb-24 page-transition">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
       {/* Error Message */}
       {error && (
         <div className="p-4 bg-danger-bg border border-danger rounded-xl text-danger backdrop-blur-sm">
@@ -501,7 +503,9 @@ function WorkspaceView({ workspaceId, viewMode: viewModeParam, onBack, showNamin
           </div>
         </div>
       )}
-    </div>
+        </div>
+      </div>
+    </main>
   );
 }
 

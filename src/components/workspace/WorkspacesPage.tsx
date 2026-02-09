@@ -59,7 +59,7 @@ function WorkspacesPage({ onSelectWorkspace, onStartNewProcess }: WorkspacesPage
   };
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-24 m-10">
       {error && (
         <ErrorMessage message={error} onDismiss={() => setError(null)} />
       )}
