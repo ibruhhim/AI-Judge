@@ -301,7 +301,6 @@ export async function getAnswersForQuestions(questionIds: string[]): Promise<Map
     .in('question_id', questionIds);
 
   if (error) {
-    console.error('Error fetching answers:', error);
     return new Map();
   }
 
