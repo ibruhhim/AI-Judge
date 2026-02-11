@@ -5,12 +5,12 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Workspace } from '../../types/database';
-import { getAllUserWorkspaces, deleteWorkspace } from '../../services/workspaceManagementService';
-import WorkspacesList from './WorkspacesList';
-import ErrorMessage from '../shared/ErrorMessage';
-import ConfirmDialog from '../shared/ConfirmDialog';
-import Button from '../shared/Button';
+import { Workspace } from '../types/database';
+import { getAllUserWorkspaces, deleteWorkspace } from '../services/workspaceManagementService';
+import WorkspacesList from '../components/workspace/WorkspacesList';
+import ErrorMessage from '../components/shared/ErrorMessage';
+import ConfirmDialog from '../components/shared/ConfirmDialog';
+import Button from '../components/shared/Button';
 
 interface WorkspacesPageProps {
   onSelectWorkspace: (workspaceId: string) => void;

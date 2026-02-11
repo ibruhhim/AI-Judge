@@ -1,5 +1,5 @@
 /**
- * Workflow Layout Component
+ * Workflow Page Component
  * 
  * Handles the multi-step workflow for creating and evaluating submissions.
  * Manages state for workspace, step completion, and navigation between steps.
@@ -7,16 +7,16 @@
 
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
-import UploadStep from './UploadStep';
-import JudgesStep from './JudgesStep';
-import AssignStep from './AssignStep';
-import ResultsStep from './ResultsStep';
-import RunEvaluationsButton from '../shared/RunEvaluationsButton';
-import WorkspaceNamingDialog from '../workspace/WorkspaceNamingDialog';
-import { updateWorkspaceName, deleteWorkspace, deleteTemporaryWorkspaces } from '../../services/workspaceManagementService';
-import StepNavigation from './StepNavigation';
-import BottomNavigation from './BottomNavigation';
+import { useTheme } from '../contexts/ThemeContext';
+import UploadStep from '../components/workflow/UploadStep';
+import JudgesStep from '../components/workflow/JudgesStep';
+import AssignStep from '../components/workflow/AssignStep';
+import ResultsStep from '../components/workflow/ResultsStep';
+import RunEvaluationsButton from '../components/shared/RunEvaluationsButton';
+import WorkspaceNamingDialog from '../components/workspace/WorkspaceNamingDialog';
+import { updateWorkspaceName, deleteWorkspace, deleteTemporaryWorkspaces } from '../services/workspaceManagementService';
+import StepNavigation from '../components/workflow/StepNavigation';
+import BottomNavigation from '../components/workflow/BottomNavigation';
 
 const steps = [
   { id: 'upload', label: 'Upload Data', number: 1, path: '/workflow/upload' },
@@ -25,7 +25,7 @@ const steps = [
   { id: 'results', label: 'View Results', number: 4, path: '/workflow/results' },
 ] as const;
 
-function WorkflowLayout() {
+function WorkflowPage() {
   const { theme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -184,4 +184,4 @@ function WorkflowLayout() {
   );
 }
 
-export default WorkflowLayout;
+export default WorkflowPage;

@@ -1,14 +1,14 @@
 /**
- * Workspace Route Component
+ * Workspace Route Page Component
  * 
  * Handles routing for workspace views.
- * Extracts workspaceId and viewMode from URL params and renders WorkspaceView.
+ * Extracts workspaceId and viewMode from URL params and renders WorkspaceViewPage.
  */
 
 import { useNavigate, useParams } from 'react-router-dom';
-import WorkspaceView from './WorkspaceView';
+import WorkspaceViewPage from './WorkspaceViewPage';
 
-function WorkspaceRoute() {
+function WorkspaceRoutePage() {
   const { workspaceId, viewMode } = useParams<{ workspaceId: string; viewMode?: string }>();
   const navigate = useNavigate();
 
@@ -18,7 +18,7 @@ function WorkspaceRoute() {
   }
 
   return (
-    <WorkspaceView
+    <WorkspaceViewPage
       workspaceId={workspaceId}
       viewMode={viewMode || 'overview'}
       onBack={() => navigate('/')}
@@ -27,4 +27,4 @@ function WorkspaceRoute() {
   );
 }
 
-export default WorkspaceRoute;
+export default WorkspaceRoutePage;

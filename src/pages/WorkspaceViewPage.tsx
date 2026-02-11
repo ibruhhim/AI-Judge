@@ -1,5 +1,5 @@
 /**
- * Workspace View Component
+ * Workspace View Page Component
  * 
  * Main workspace interface where users can:
  * - Upload/edit data
@@ -13,21 +13,21 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import UploadStep from '../workflow/UploadStep';
-import JudgesStep from '../workflow/JudgesStep';
-import AssignStep from '../workflow/AssignStep';
-import ResultsStep from '../workflow/ResultsStep';
-import WorkspaceNamingDialog from './WorkspaceNamingDialog';
-import WorkspaceHeader from './WorkspaceHeader';
-import WorkspaceNavigationTabs from './WorkspaceNavigationTabs';
-import BackButton from './BackButton';
-import RenameWorkspaceDialog from './RenameWorkspaceDialog';
-import ErrorMessage from '../shared/ErrorMessage';
-import { supabase } from '../../lib/supabase';
-import { updateWorkspaceName } from '../../services/workspaceManagementService';
-import { Workspace } from '../../types/database';
+import UploadStep from '../components/workflow/UploadStep';
+import JudgesStep from '../components/workflow/JudgesStep';
+import AssignStep from '../components/workflow/AssignStep';
+import ResultsStep from '../components/workflow/ResultsStep';
+import WorkspaceNamingDialog from '../components/workspace/WorkspaceNamingDialog';
+import WorkspaceHeader from '../components/workspace/WorkspaceHeader';
+import WorkspaceNavigationTabs from '../components/workspace/WorkspaceNavigationTabs';
+import BackButton from '../components/workspace/BackButton';
+import RenameWorkspaceDialog from '../components/workspace/RenameWorkspaceDialog';
+import ErrorMessage from '../components/shared/ErrorMessage';
+import { supabase } from '../lib/supabase';
+import { updateWorkspaceName } from '../services/workspaceManagementService';
+import { Workspace } from '../types/database';
 
-interface WorkspaceViewProps {
+interface WorkspaceViewPageProps {
   workspaceId: string;
   viewMode: string;
   onBack: () => void;
@@ -36,7 +36,7 @@ interface WorkspaceViewProps {
 
 type ViewMode = 'overview' | 'upload' | 'judges' | 'assign' | 'results';
 
-function WorkspaceView({ workspaceId, viewMode: viewModeParam, onBack, showNamingOnLoad = false }: WorkspaceViewProps) {
+function WorkspaceViewPage({ workspaceId, viewMode: viewModeParam, onBack, showNamingOnLoad = false }: WorkspaceViewPageProps) {
   const navigate = useNavigate();
   const viewMode = (viewModeParam || 'overview') as ViewMode;
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -273,4 +273,4 @@ function WorkspaceView({ workspaceId, viewMode: viewModeParam, onBack, showNamin
   );
 }
 
-export default WorkspaceView;
+export default WorkspaceViewPage;

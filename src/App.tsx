@@ -13,10 +13,10 @@
 
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './components/shared/Navbar';
-import HeroLanding from './components/landing/HeroLanding';
-import WorkspacesPage from './components/workspace/WorkspacesPage';
-import WorkspaceRoute from './components/workspace/WorkspaceRoute';
-import WorkflowLayout from './components/workflow/WorkflowLayout';
+import HeroLandingPage from './pages/HeroLandingPage';
+import WorkspacesPage from './pages/WorkspacesPage';
+import WorkspaceRoutePage from './pages/WorkspaceRoutePage';
+import WorkflowPage from './pages/WorkflowPage';
 
 function App() {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={<HeroLanding />}
+            element={<HeroLandingPage />}
           />
           <Route
             path="/workspaces"
@@ -44,15 +44,15 @@ function App() {
           />
           <Route
             path="/workspace/:workspaceId"
-            element={<WorkspaceRoute />}
+            element={<WorkspaceRoutePage />}
           />
           <Route
             path="/workspace/:workspaceId/:viewMode"
-            element={<WorkspaceRoute />}
+            element={<WorkspaceRoutePage />}
           />
           <Route
             path="/workflow/*"
-            element={<WorkflowLayout />}
+            element={<WorkflowPage />}
           />
         </Routes>
       </div>

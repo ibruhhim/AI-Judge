@@ -6,17 +6,17 @@
  */
 
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useScrollAnimation } from '../../hooks/useScrollAnimation';
-import AIJudgeCard from '../shared/AIJudgeCard';
-import SectionHeader from '../shared/SectionHeader';
-import Button from '../shared/Button';
-import BesimpleLogo from '../shared/BesimpleLogo';
-import PalmTreeLogo from '../shared/PalmTreeLogo';
-import EvaluationExample from '../shared/EvaluationExample';
-import AnimatedLineChart from '../shared/AnimatedLineChart';
+import { useTheme } from '../contexts/ThemeContext';
+import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import AIJudgeCard from '../components/shared/AIJudgeCard';
+import SectionHeader from '../components/shared/SectionHeader';
+import Button from '../components/shared/Button';
+import BesimpleLogo from '../components/shared/BesimpleLogo';
+import PalmTreeLogo from '../components/shared/PalmTreeLogo';
+import EvaluationExample from '../components/shared/EvaluationExample';
+import AnimatedLineChart from '../components/shared/AnimatedLineChart';
 
-function HeroLanding() {
+function HeroLandingPage() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const evaluationSection = useScrollAnimation({ threshold: 0.2 });
@@ -281,4 +281,4 @@ function HeroLanding() {
   );
 }
 
-export default HeroLanding;
+export default HeroLandingPage;
